@@ -1,93 +1,54 @@
-
-# ░█████╗░██████╗░███╗░░░███╗██╗███╗░░██╗  ███████╗░██████╗███╗░░░███╗░█████╗░██╗██╗░░░░░██╗
-# ██╔══██╗██╔══██╗████╗░████║██║████╗░██║  ██╔════╝██╔════╝████╗░████║██╔══██╗██║██║░░░░░██║
-# ███████║██████╔╝██╔████╔██║██║██╔██╗██║  █████╗░░╚█████╗░██╔████╔██║███████║██║██║░░░░░██║
-# ██╔══██║██╔══██╗██║╚██╔╝██║██║██║╚████║  ██╔══╝░░░╚═══██╗██║╚██╔╝██║██╔══██║██║██║░░░░░██║
-# ██║░░██║██║░░██║██║░╚═╝░██║██║██║░╚███║  ███████╗██████╔╝██║░╚═╝░██║██║░░██║██║███████╗██║
-# ╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░░░░╚═╝╚═╝╚═╝░░╚══╝  ╚══════╝╚═════╝░╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝╚══════╝╚═╝
-# OCR for camera detection with login system
-
 import subprocess
 import os
-
-# current_directory = os.path.dirname(os.path.abspath(__file__))
-# batch_file_path = os.path.join(current_directory, "requirements.bat")
-# try:
-#     # Run the batch file
-#     subprocess.run(batch_file_path, check=True, shell=True)
-#     print("Batch file executed successfully.")
-# except subprocess.CalledProcessError as e:
-#     print(f"An error occurred while executing the batch file!")
-
-
-# OpenCV is used for capturing video from the webcam and handling image processing
 import cv2
-
-# EasyOCR is a library that allows Optical Character Recognition (OCR) for text detection in images
 import easyocr
-
-# CustomTkinter is an extension of the Tkinter library, which is used for creating modern graphical user interfaces (GUIs)
 import customtkinter
-
-# Threading is used to run tasks (like capturing video and performing OCR) in parallel without freezing the UI
-import threading
-
-# Tkinter components for handling text boxes, scrollbars, and pop-up message boxes
-from tkinter import Text, Scrollbar, RIGHT, Y, END, messagebox
-
-# PIL (Python Imaging Library) is used to handle image processing and conversion of OpenCV images to display in Tkinter
-from PIL import Image, ImageTk
-
-# gTTS (Google Text-to-Speech) is used to convert detected text into audio files (speech)
+from tkinter import Text, Scrollbar, RIGHT, Y, END, messagebox, simpledialog
+from PIL import Image, ImageTk, ImageFont, ImageDraw
 from gtts import gTTS
-
-# The 'os' library is used for interacting with the operating system, like playing audio files
-import os
-
-# MySQL connector is used to establish a connection to a MySQL database for user authentication
 import mysql.connector
-
-# The hashlib library provides the 'sha256' hashing algorithm to securely hash passwords before storing them in the database
 from hashlib import sha256
-
-from tkinter import messagebox
-
+from tkinter import filedialog
+import numpy as np
+import threading
+from PIL import Image, ImageTk
 
 
 
 # Database connection using mysql connector 
-mydb = mysql.connector.connect(
-    host="10.2.3.236",  # database ip if you run it on your pc type : localhost
-    user="armin", # user name of database you can create one or check users table on database
-    password="1382", # password of your database
-    database="user_auth", # database name you can simply create it like i did in db.sql
-    port=3306 # your port that is open for everyone to connect 
-)
+def connect_to_database():
+    try:
+        mydb = mysql.connector.connect(
+            host="10.2.3.236",  # database ip if you run it on your pc type : localhost
+            user="armin",  # user name of database you can create one or check users table on database
+            password="1382",  # password of your database
+            database="user_auth",  # database name you can simply create it like i did in db.sql
+            port=3306  # your port that is open for everyone to connect
+        )
+        return mydb
+    except mysql.connector.Error as err:
+        messagebox.showerror("Database Connection Error", f"Error: {err}")
+        return None
 
-#Allows Python code to execute PostgreSQL command in a database session
-cursor = mydb.cursor() 
+# Database connection
+mydb = connect_to_database()
+if mydb is not None:
+    cursor = mydb.cursor()
 
 # Function to hash passwords using sha256 
-# using hash to hide the password that no one can see your password.
 def hash_password(password):
     return sha256(password.encode()).hexdigest()
 
 # Function to register a new user
-def sign_up(username, password): #function takes tow var that calls : username and password
-    if not username or not password: # if field is empty then you get the error
-        messagebox.showerror("Error", "Username and password cannot be empty.") # sending error
-        return # closing signup function
-    try: # try to do something if it dosent or it couldn't so it expected other function
-        # hashing the password by using the function : hash_password()
+def sign_up(username, password):
+    if not username or not password:
+        messagebox.showerror("Error", "Username and password cannot be empty.")
+        return
+    try:
         hashed_password = hash_password(password)
-        # execute sql as it sends and insert to username and password 
         cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, hashed_password))
-        
         mydb.commit()
-
-        # massage that you are good to goo :)
         messagebox.showinfo("Success", "User registered successfully!")
-        # if not then error
     except mysql.connector.IntegrityError:
         messagebox.showerror("Error", "Username already exists.")
 
@@ -133,7 +94,7 @@ def open_main_application():
     scrollbar.config(command=text_box.yview)
 
     # Initialize camera with reduced resolution
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Use DirectShow backend
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # Set lower resolution width
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)  # Set lower resolution height
 
@@ -231,50 +192,74 @@ def open_main_application():
     tts_button = customtkinter.CTkButton(app, text="Text-to-Speech", command=text_to_speech)
     tts_button.pack(padx=20, pady=10)
 
-# Create app using CustomTkinter
-# Create app using CustomTkinter
+    # Training button to open the training pop-up
+    train_button = customtkinter.CTkButton(app, text="Train AI", command=open_train_popup)
+    train_button.pack(pady=10)
+
+# Function to open a pop-up for importing a font or taking a picture for training
+def open_train_popup():
+    train_popup = customtkinter.CTkToplevel(app)
+    train_popup.title("Train Model")
+
+    # Add a descriptive text label at the top for user instructions
+    instruction_label = customtkinter.CTkLabel(
+        train_popup, text="Use this pop-up to add fonts for training.", text_color="gray"
+    )
+    instruction_label.pack(padx=10, pady=10)
+
+    # Frame for import font option
+    frame = customtkinter.CTkFrame(train_popup)
+    frame.pack(padx=20, pady=20)
+
+    # Label to display instructions for adding fonts
+    font_instructions = customtkinter.CTkLabel(frame, text="You can add fonts here as needed.")
+    font_instructions.pack(pady=(0, 10))
+
+    # Button to import a font
+    import_font_button = customtkinter.CTkButton(frame, text="Import Font", command=import_font)
+    import_font_button.pack(padx=10, pady=10)
+
+
+# Function to import a font for training
+def import_font():
+    font_file = filedialog.askopenfilename(filetypes=[("TrueType Font", "*.ttf")])
+    if font_file:
+        # Placeholder for actual font processing
+        messagebox.showinfo("Font Import", f"Font imported successfully: {font_file}")
+        # You would now need to integrate the font into your training dataset (using a library like PIL for generating synthetic images)
+
+
+
+
+
+# Main login page setup
 app = customtkinter.CTk()
 
-# Get the screen width and height
-screen_width = app.winfo_screenwidth()
-screen_height = app.winfo_screenheight()
-
-# Get the window width and height
-window_width = 1024  # or use the desired width
-window_height = 768  # or use the desired height
-
-# Calculate the position to center the window
-position_top = int(screen_height / 2 - window_height / 2)
-position_right = int(screen_width / 2 - window_width / 2)
-
-# Set the window size and position
-app.geometry(f'{window_width}x{window_height}+{position_right}+{position_top}')
-app.title("BlindVision")
-app.iconbitmap("eye.ico")
-
-
-# Login/Sign-Up Frame
+# Login screen components
 login_frame = customtkinter.CTkFrame(app)
-login_frame.pack(pady=20, padx=20)
+login_frame.pack(padx=20, pady=20)
 
-# Username entry
 username_label = customtkinter.CTkLabel(login_frame, text="Username")
-username_label.pack(pady=5)
+username_label.pack(pady=10)
+
 username_entry = customtkinter.CTkEntry(login_frame)
-username_entry.pack(pady=5)
+username_entry.pack(pady=10)
 
-# Password entry
 password_label = customtkinter.CTkLabel(login_frame, text="Password")
-password_label.pack(pady=5)
+password_label.pack(pady=10)
+
 password_entry = customtkinter.CTkEntry(login_frame, show="*")
-password_entry.pack(pady=5)
+password_entry.pack(pady=10)
 
-# Login button
 login_button = customtkinter.CTkButton(login_frame, text="Login", command=lambda: login(username_entry.get(), password_entry.get()))
-login_button.pack(pady=10)
+login_button.pack(pady=20)
 
-# Sign-Up button
 signup_button = customtkinter.CTkButton(login_frame, text="Sign Up", command=lambda: sign_up(username_entry.get(), password_entry.get()))
 signup_button.pack(pady=10)
+
+# Main window setup
+app.geometry("600x400")
+app.title("Blindvison")
+app.iconbitmap("eye.ico")
 
 app.mainloop()
