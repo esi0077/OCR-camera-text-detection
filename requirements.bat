@@ -48,6 +48,7 @@ pip install numpy==1.23.4 opencv-python==4.6.0.66
 pip cache purge
 pip install numpy opencv-python
 pip install threading
+pip install easyocr torch torchvision
 
 
 echo Installation complete.

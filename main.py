@@ -1,3 +1,12 @@
+# ░█████╗░██████╗░███╗░░░███╗██╗███╗░░██╗  ███████╗░██████╗███╗░░░███╗░█████╗░██╗██╗░░░░░██╗
+# ██╔══██╗██╔══██╗████╗░████║██║████╗░██║  ██╔════╝██╔════╝████╗░████║██╔══██╗██║██║░░░░░██║
+# ███████║██████╔╝██╔████╔██║██║██╔██╗██║  █████╗░░╚█████╗░██╔████╔██║███████║██║██║░░░░░██║
+# ██╔══██║██╔══██╗██║╚██╔╝██║██║██║╚████║  ██╔══╝░░░╚═══██╗██║╚██╔╝██║██╔══██║██║██║░░░░░██║
+# ██║░░██║██║░░██║██║░╚═╝░██║██║██║░╚███║  ███████╗██████╔╝██║░╚═╝░██║██║░░██║██║███████╗██║
+# ╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░░░░╚═╝╚═╝╚═╝░░╚══╝  ╚══════╝╚═════╝░╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝╚══════╝╚═╝
+# github : https://github.com/esi0077
+
+
 import subprocess
 import os
 import cv2
@@ -11,33 +20,34 @@ from hashlib import sha256
 from tkinter import filedialog
 import numpy as np
 import threading
-from PIL import Image, ImageTk
+import shutil
 
-
-
-# Database connection using mysql connector 
+# Database connection using mysql.connector
 def connect_to_database():
     try:
         mydb = mysql.connector.connect(
-            host="10.2.3.236",  # database ip if you run it on your pc type : localhost
-            user="armin",  # user name of database you can create one or check users table on database
-            password="1382",  # password of your database
-            database="user_auth",  # database name you can simply create it like i did in db.sql
-            port=3306  # your port that is open for everyone to connect
+            host="10.2.3.236",  # database IP or localhost
+            user="armin",  # database username
+            password="1382",  # database password
+            database="user_auth",  # database name
+            port=3306  # database port
         )
         return mydb
     except mysql.connector.Error as err:
         messagebox.showerror("Database Connection Error", f"Error: {err}")
         return None
 
+
 # Database connection
 mydb = connect_to_database()
 if mydb is not None:
     cursor = mydb.cursor()
 
-# Function to hash passwords using sha256 
+
+# Function to hash passwords using sha256
 def hash_password(password):
     return sha256(password.encode()).hexdigest()
+
 
 # Function to register a new user
 def sign_up(username, password):
@@ -52,6 +62,7 @@ def sign_up(username, password):
     except mysql.connector.IntegrityError:
         messagebox.showerror("Error", "Username already exists.")
 
+
 # Function to authenticate user login
 def login(username, password):
     if not username or not password:
@@ -65,6 +76,7 @@ def login(username, password):
         open_main_application()  # Open the OCR application on successful login
     else:
         messagebox.showerror("Error", "Invalid username/password.")
+
 
 # Function to open the main OCR application after login
 def open_main_application():
@@ -176,7 +188,7 @@ def open_main_application():
             tts = gTTS(text=detected_text, lang=detected_language, slow=False)
             audio_file = "detected_text.mp3"
             tts.save(audio_file)
-            os.system(f"start {audio_file}")  # For Windows; use "afplay" for macOS or "xdg-open" for Linux
+            os.system(f"start {audio_file}") 
 
             # Clear the detected text after playing
             detected_text = ""
@@ -195,6 +207,7 @@ def open_main_application():
     # Training button to open the training pop-up
     train_button = customtkinter.CTkButton(app, text="Train AI", command=open_train_popup)
     train_button.pack(pady=10)
+
 
 # Function to open a pop-up for importing a font or taking a picture for training
 def open_train_popup():
@@ -219,45 +232,73 @@ def open_train_popup():
     import_font_button = customtkinter.CTkButton(frame, text="Import Font", command=import_font)
     import_font_button.pack(padx=10, pady=10)
 
+    # Button to upload training images and labels
+    upload_images_button = customtkinter.CTkButton(train_popup, text="Upload Images and Labels", command=upload_training_images_and_labels)
+    upload_images_button.pack(padx=20, pady=10)
 
-# Function to import a font for training
+
+# Function to import font files
 def import_font():
-    font_file = filedialog.askopenfilename(filetypes=[("TrueType Font", "*.ttf")])
-    if font_file:
-        # Placeholder for actual font processing
-        messagebox.showinfo("Font Import", f"Font imported successfully: {font_file}")
-        # You would now need to integrate the font into your training dataset (using a library like PIL for generating synthetic images)
+    font_path = filedialog.askopenfilename(filetypes=[("TrueType Fonts", "*.ttf")])
+    if font_path:
+        shutil.copy(font_path, './training_data/fonts/')
+        messagebox.showinfo("Font Imported", "Font imported successfully!")
 
 
+# Function to upload training images and labels
+def upload_training_images_and_labels():
+    image_files = filedialog.askopenfilenames(filetypes=[("Image Files", "*.jpg;*.jpeg;*.png")])
+
+    if image_files:
+        for image_file in image_files:
+            image_filename = os.path.basename(image_file)
+            shutil.copy(image_file, './training_data/images/')
+
+            # Ask user to input the label
+            label_text = simpledialog.askstring("Enter Label", f"Enter label for {image_filename}:")
+            if label_text:
+                label_filename = os.path.splitext(image_filename)[0] + '.txt'
+                label_file_path = os.path.join('./training_data/labels/', label_filename)
+                with open(label_file_path, 'w') as label_file:
+                    label_file.write(label_text)
+                messagebox.showinfo("Label Saved", f"Label saved for {image_filename}.")
+            else:
+                messagebox.showwarning("No Label", f"No label entered for {image_filename}.")
+        messagebox.showinfo("Upload Successful", "Images and labels uploaded successfully.")
+    else:
+        messagebox.showwarning("No Image Selected", "No image selected for upload.")
 
 
-
-# Main login page setup
+# GUI setup
 app = customtkinter.CTk()
+app.title("OCR Application")
+app.geometry("800x600")
 
-# Login screen components
+# Login Frame
 login_frame = customtkinter.CTkFrame(app)
-login_frame.pack(padx=20, pady=20)
+login_frame.pack(pady=20)
 
-username_label = customtkinter.CTkLabel(login_frame, text="Username")
-username_label.pack(pady=10)
+# Username and password fields
+username_label = customtkinter.CTkLabel(login_frame, text="Username:")
+username_label.grid(row=0, column=0, padx=10, pady=5)
 
 username_entry = customtkinter.CTkEntry(login_frame)
-username_entry.pack(pady=10)
+username_entry.grid(row=0, column=1, padx=10, pady=5)
 
-password_label = customtkinter.CTkLabel(login_frame, text="Password")
-password_label.pack(pady=10)
+password_label = customtkinter.CTkLabel(login_frame, text="Password:")
+password_label.grid(row=1, column=0, padx=10, pady=5)
 
 password_entry = customtkinter.CTkEntry(login_frame, show="*")
-password_entry.pack(pady=10)
+password_entry.grid(row=1, column=1, padx=10, pady=5)
 
+# Buttons for Sign Up and Login
 login_button = customtkinter.CTkButton(login_frame, text="Login", command=lambda: login(username_entry.get(), password_entry.get()))
-login_button.pack(pady=20)
+login_button.grid(row=2, column=1, padx=10, pady=10)
 
 signup_button = customtkinter.CTkButton(login_frame, text="Sign Up", command=lambda: sign_up(username_entry.get(), password_entry.get()))
-signup_button.pack(pady=10)
+signup_button.grid(row=3, column=1, padx=10, pady=10)
 
-# Main window setup
+
 app.geometry("600x400")
 app.title("Blindvison")
 app.iconbitmap("eye.ico")
