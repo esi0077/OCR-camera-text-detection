@@ -49,7 +49,7 @@ pip cache purge
 pip install numpy opencv-python
 pip install threading
 pip install easyocr torch torchvision
-
+pip install uuid
 
 echo Installation complete.
 pause

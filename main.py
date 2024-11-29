@@ -5,6 +5,7 @@
 # ██║░░██║██║░░██║██║░╚═╝░██║██║██║░╚███║  ███████╗██████╔╝██║░╚═╝░██║██║░░██║██║███████╗██║
 # ╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░░░░╚═╝╚═╝╚═╝░░╚══╝  ╚══════╝╚═════╝░╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝╚══════╝╚═╝
 # github : https://github.com/esi0077
+# mail : armines765@gmail.com
 
 
 import subprocess
@@ -21,9 +22,19 @@ from tkinter import filedialog
 import numpy as np
 import threading
 import shutil
+import uuid
 
+# runing bat file to install everything 
+os.system("requirements.bat")
 # Database connection using mysql.connector
 def connect_to_database():
+    # trying to connect to the host by using ip address 
+    # user : the database username that we have it can be root or whatever
+    # password : using a password to connect to database (you can choose it when u making the user)
+    # database : database name that we make (wrote in db.sql)
+    # port : we use an open port to connect to target pc like 3306 here 
+    # ports are important to connect and changing on which app you going to use it on 
+    # some ports : 8080 , 30120 , ... (check firewall for it)
     try:
         mydb = mysql.connector.connect(
             host="10.2.3.236",  # database IP or localhost
@@ -33,6 +44,8 @@ def connect_to_database():
             port=3306  # database port
         )
         return mydb
+        # if there is an error with data base then its going to show you the error
+        # messagebox is the alert pop up
     except mysql.connector.Error as err:
         messagebox.showerror("Database Connection Error", f"Error: {err}")
         return None
@@ -44,9 +57,13 @@ if mydb is not None:
     cursor = mydb.cursor()
 
 
-# Function to hash passwords using sha256
+# Function to hash passwords using sha256 + salt
 def hash_password(password):
-    return sha256(password.encode()).hexdigest()
+    salt = uuid.uuid4().hex # Generate a unique salt that no one can crack 
+                            #(using uuid to generate new id each time)
+    hashed_password = sha256(salt.encode() + password.encode()).hexdigest() 
+    return salt, hashed_password
+
 
 
 # Function to register a new user
@@ -55,12 +72,14 @@ def sign_up(username, password):
         messagebox.showerror("Error", "Username and password cannot be empty.")
         return
     try:
-        hashed_password = hash_password(password)
-        cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, hashed_password))
+        salt, hashed_password = hash_password(password)
+        cursor.execute("INSERT INTO users (username, password, salt) VALUES (%s, %s, %s)", 
+                       (username, hashed_password, salt))
         mydb.commit()
         messagebox.showinfo("Success", "User registered successfully!")
     except mysql.connector.IntegrityError:
         messagebox.showerror("Error", "Username already exists.")
+
 
 
 # Function to authenticate user login
@@ -68,14 +87,22 @@ def login(username, password):
     if not username or not password:
         messagebox.showerror("Error", "Username and password cannot be empty.")
         return
-    hashed_password = hash_password(password)
-    cursor.execute("SELECT * FROM users WHERE username=%s AND password=%s", (username, hashed_password))
-    result = cursor.fetchone()
-    if result:
-        messagebox.showinfo("Success", "Login successful!")
-        open_main_application()  # Open the OCR application on successful login
-    else:
-        messagebox.showerror("Error", "Invalid username/password.")
+    try:
+        cursor.execute("SELECT password, salt FROM users WHERE username=%s", (username,))
+        result = cursor.fetchone()
+        if result:
+            stored_password, salt = result
+            hashed_password = sha256(salt.encode() + password.encode()).hexdigest()
+            if hashed_password == stored_password:
+                messagebox.showinfo("Success", "Login successful!")
+                open_main_application()  # Open the OCR application on successful login
+            else:
+                messagebox.showerror("Error", "Invalid username/password.")
+        else:
+            messagebox.showerror("Error", "Invalid username/password.")
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {e}")
+
 
 
 # Function to open the main OCR application after login

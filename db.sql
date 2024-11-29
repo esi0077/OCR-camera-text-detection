@@ -9,4 +9,5 @@ CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,       -- Unique user ID
     username VARCHAR(50) NOT NULL UNIQUE,    -- Username (must be unique)
     password VARCHAR(100) NOT NULL           -- Hashed password
+    ALTER TABLE users ADD salt VARCHAR(64) AFTER password;
 );
