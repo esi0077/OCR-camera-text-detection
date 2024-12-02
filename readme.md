@@ -1,4 +1,4 @@
-# On camera detection
+# On camera detection based on EasyOcr
 
 ### 🟢 how to download
 > Download script from [github](https://github.com/esi0077/OCR)
@@ -53,7 +53,7 @@ you can read this tutarial for learning how to setup ubunto on rasberry pi and i
 ### ❓FAQ
 
 #### what is OCR ?
-> Optical character recognition that can read words and convert it to digital words.
+> Optical character recognition that can scan words and convert it to digital words.
 
 #### What does this app ?
 
