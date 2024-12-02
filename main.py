@@ -25,7 +25,7 @@ import shutil
 import uuid
 
 # runing bat file to install everything 
-os.system("requirements.bat")
+# os.system("requirements.bat")
 # Database connection using mysql.connector
 def connect_to_database():
     # trying to connect to the host by using ip address 
@@ -43,6 +43,13 @@ def connect_to_database():
             database="user_auth",  # database name
             port=3306  # database port
         )
+        # mydb = mysql.connector.connect(
+        #     host="localhost",  # database IP or localhost
+        #     user="root",  # database username
+        #     password="",  # database password
+        #     database="user_auth",  # database name
+        #     port=3306  # database port
+        # )
         return mydb
         # if there is an error with data base then its going to show you the error
         # messagebox is the alert pop up

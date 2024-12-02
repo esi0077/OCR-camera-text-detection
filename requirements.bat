@@ -1,4 +1,18 @@
 @echo off
+title Dependency Checker
+color 01
+
+REM Welcome message
+echo ==========================================
+echo.        Welcome to the Dependency Checker!
+echo ==========================================
+echo.
+echo This script will ensure all necessary dependencies 
+echo are installed and up-to-date.
+echo Please make sure you are connected to the internet.
+echo.
+pause
+
 REM Check if Python is installed
 python --version >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
@@ -51,5 +65,8 @@ pip install threading
 pip install easyocr torch torchvision
 pip install uuid
 
-echo Installation complete.
+echo.
+echo ==========================================
+echo.         Installation Complete!
+echo ==========================================
 pause
