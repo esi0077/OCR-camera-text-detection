@@ -43,6 +43,7 @@ def connect_to_database():
             database="user_auth",  # database name
             port=3306  # database port
         )
+        # for connecting to localhost then this code work
         # mydb = mysql.connector.connect(
         #     host="localhost",  # database IP or localhost
         #     user="root",  # database username
@@ -59,6 +60,7 @@ def connect_to_database():
 
 
 # Database connection
+# if we have database or conection then you can do stuff
 mydb = connect_to_database()
 if mydb is not None:
     cursor = mydb.cursor()
@@ -66,31 +68,43 @@ if mydb is not None:
 
 # Function to hash passwords using sha256 + salt
 def hash_password(password):
-    salt = uuid.uuid4().hex # Generate a unique salt that no one can crack 
-                            #(using uuid to generate new id each time)
+    salt = uuid.uuid4().hex # Generate a unique salt that no one can crack using uuid and hex 
+                            # uuid make a uniqe id and we hex the id after it to make it harder to read
+                            # and we call it salt id that use as key for hashed password
     hashed_password = sha256(salt.encode() + password.encode()).hexdigest() 
+    # now we hash the password and adding it to password and using hexdigest to make it more readble 
+    # normally sha256 output is binery so better to use hexdigest to make it human readble.
     return salt, hashed_password
-
+    # returning salt and hash password so we can read it later.
 
 
 # Function to register a new user
+# Fetching data : username and password 
 def sign_up(username, password):
+    # if the fields of username and password are not full so the app will pop up the error 
     if not username or not password:
         messagebox.showerror("Error", "Username and password cannot be empty.")
         return
+    # if the fields are ok then it will do the salting process 
     try:
+    # and after hashing process it going to send it to database and insert it to rows that  
+    # named : username , password , salt
         salt, hashed_password = hash_password(password)
         cursor.execute("INSERT INTO users (username, password, salt) VALUES (%s, %s, %s)", 
                        (username, hashed_password, salt))
         mydb.commit()
+    # sending pop up that shows you are in order and you got username and password
         messagebox.showinfo("Success", "User registered successfully!")
     except mysql.connector.IntegrityError:
+        # if username exists then you get an error
         messagebox.showerror("Error", "Username already exists.")
 
 
 
 # Function to authenticate user login
+# fetching data: username and password
 def login(username, password):
+    # same as sign up you can not have any empty fileds
     if not username or not password:
         messagebox.showerror("Error", "Username and password cannot be empty.")
         return
@@ -266,9 +280,7 @@ def open_train_popup():
     import_font_button = customtkinter.CTkButton(frame, text="Import Font", command=import_font)
     import_font_button.pack(padx=10, pady=10)
 
-    # Button to upload training images and labels
-    upload_images_button = customtkinter.CTkButton(train_popup, text="Upload Images and Labels", command=upload_training_images_and_labels)
-    upload_images_button.pack(padx=20, pady=10)
+
 
 
 # Function to import font files
@@ -277,30 +289,6 @@ def import_font():
     if font_path:
         shutil.copy(font_path, './training_data/fonts/')
         messagebox.showinfo("Font Imported", "Font imported successfully!")
-
-
-# Function to upload training images and labels
-def upload_training_images_and_labels():
-    image_files = filedialog.askopenfilenames(filetypes=[("Image Files", "*.jpg;*.jpeg;*.png")])
-
-    if image_files:
-        for image_file in image_files:
-            image_filename = os.path.basename(image_file)
-            shutil.copy(image_file, './training_data/images/')
-
-            # Ask user to input the label
-            label_text = simpledialog.askstring("Enter Label", f"Enter label for {image_filename}:")
-            if label_text:
-                label_filename = os.path.splitext(image_filename)[0] + '.txt'
-                label_file_path = os.path.join('./training_data/labels/', label_filename)
-                with open(label_file_path, 'w') as label_file:
-                    label_file.write(label_text)
-                messagebox.showinfo("Label Saved", f"Label saved for {image_filename}.")
-            else:
-                messagebox.showwarning("No Label", f"No label entered for {image_filename}.")
-        messagebox.showinfo("Upload Successful", "Images and labels uploaded successfully.")
-    else:
-        messagebox.showwarning("No Image Selected", "No image selected for upload.")
 
 
 # GUI setup
