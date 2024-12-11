@@ -64,6 +64,7 @@ pip install numpy opencv-python
 pip install threading
 pip install easyocr torch torchvision
 pip install uuid
+pip install langdetect
 
 echo.
 echo ==========================================

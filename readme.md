@@ -10,7 +10,10 @@
 ```
  pip install -r requirements.txt
 ```
-now there is tow folder that you can use 
+### 🟢 update V1.1
+
+now you get a auto update for requirement so you dont need to install it manually
+
 
 ### 🟠 if you want to use source (own database)
 
