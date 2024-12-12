@@ -65,21 +65,21 @@ def connect_to_database():
     # ports are important to connect and changing on which app you going to use it on 
     # some ports : 8080 , 30120 , ... (check firewall for it)
     try:
-        mydb = mysql.connector.connect(
-            host="10.2.3.97",  # database IP or localhost
-            user="armin",  # database username
-            password="1382",  # database password
-            database="user_auth",  # database name
-            port=3306  # database port
-        )
-        # for connecting to localhost then this code work
         # mydb = mysql.connector.connect(
-        #     host="localhost",  # database IP or localhost
-        #     user="root",  # database username
-        #     password="",  # database password
+        #     host="10.2.3.97",  # database IP or localhost
+        #     user="armin",  # database username
+        #     password="1382",  # database password
         #     database="user_auth",  # database name
         #     port=3306  # database port
         # )
+        # for connecting to localhost then this code work
+        mydb = mysql.connector.connect(
+            host="localhost",  # database IP or localhost
+            user="root",  # database username
+            password="",  # database password
+            database="user_auth",  # database name
+            port=3306  # database port
+        )
         return mydb
         # if there is an error with data base then its going to show you the error
         # messagebox is the alert pop up
@@ -284,12 +284,13 @@ def open_main_application():
         allowed_languages = {'en', 'es', 'fr', 'no'}
         try:
             detected_language = detect(text)
+            # Convert 'da' (Danish) to 'no' (Norwegian)
+            if detected_language == 'da':
+                detected_language = 'no'
             return detected_language if detected_language in allowed_languages else 'en'
         except Exception as e:
             print(f"Error detecting language: {e}")
             return 'en'  # Default to English in case of error
-           
-
 
 
     # Function to capture a frame and trigger OCR
