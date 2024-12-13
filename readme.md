@@ -24,7 +24,7 @@ git clone https://github.com/esi0077/OCR.git
 
 ### 🔵 How to use 
 
-first you need to install dependenciesby using
+first you need to install dependencies by using
 
 ```bash
  pip install -r requirements.txt
@@ -35,7 +35,7 @@ Auto-installation in main app of requirements no need to install dependencies ma
 
 ### 🟠 if you want to use source (own database)
 
-> simply open the python folder , edit it and build it with your database.
+> simply open the python file , edit line 68 to 75 or search for mydb and edit that part and build it with your database.
 
 > if you dont want to build the app you can run it by this command 
 
@@ -60,11 +60,11 @@ To connect to a database:
 you can use this databases 
 <br>
 <br>
--> Xampp - windows
+-> [Xampp](https://www.apachefriends.org) - windows
 <br>
--> wamp - windows and linux
+-> [Wamp](https://www.wampserver.com/en/) - windows and linux
 <br>
--> mariadb - windows and linux
+-> [mariadb](https://mariadb.com/) - windows and linux
 
 <br>
 <br>
