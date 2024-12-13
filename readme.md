@@ -82,7 +82,7 @@ you can read this tutarial for learning how to setup ubunto on rasberry pi and i
 
 #### What does this app ?
 
-> The app/source helps you whit typing words by using camera and convert it to speach 
+> The app/source helps you with typing words by using camera and convert it to speach 
 
 
 
