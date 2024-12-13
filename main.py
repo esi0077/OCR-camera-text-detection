@@ -285,6 +285,8 @@ def open_main_application():
         try:
             detected_language = detect(text)
             # Convert 'da' (Danish) to 'no' (Norwegian)
+            if detect_language == 'no':
+                return 'no'
             if detected_language == 'da':
                 detected_language = 'no'
             return detected_language if detected_language in allowed_languages else 'en'
@@ -391,8 +393,8 @@ login_button.grid(row=2, column=1, padx=10, pady=10)
 signup_button = customtkinter.CTkButton(login_frame, text="Sign Up", command=lambda: sign_up(username_entry.get(), password_entry.get()))
 signup_button.grid(row=3, column=1, padx=10, pady=10)
 
-
-app.geometry("600x400")
+# app name and size 
+app.geometry("900x720")
 app.title("Blindvison")
 app.iconbitmap("eye.ico")
 
