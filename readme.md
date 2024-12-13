@@ -5,12 +5,12 @@
 ---
 
 ## Table of Contents  
-1. [How to Download](#how-to-download)  
-2. [How to Use](#how-to-use)  
-3. [Features in Update v1.1](#features-in-update-v11)  
-4. [Using Your Own Database](#using-your-own-database)  
-5. [Database Options](#database-options)  
-6. [FAQ](#faq)  
+1. [How to Download](#🟢-how-to-download)  
+2. [How to Use](#🔵-how-to-use)  
+3. [Features in Update v1.1](#🟢-update-v11)  
+4. [Using Your Own Database](#🟠-if-you-want-to-use-source-own-database)  
+5. [Database Options](#🔴-if-you-dont-have-database)  
+6. [FAQ](#❓faq)
 
 ---
 
