@@ -60,11 +60,10 @@ To connect to a database:
 you can use this databases 
 <br>
 <br>
--> [Xampp](https://www.apachefriends.org) - windows
-<br>
--> [Wamp](https://www.wampserver.com/en/) - windows and linux
-<br>
--> [mariadb](https://mariadb.com/) - windows and linux
+
+- [XAMPP](https://www.apachefriends.org) - Windows  
+- [WAMP](https://www.wampserver.com/en/) - Windows and Linux  
+- [MariaDB](https://mariadb.com/) - Windows and Linux
 
 <br>
 <br>
